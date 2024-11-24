@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
@@ -35,14 +36,19 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".Broadcast.BootReceiver"
+        <receiver android:name=".Broadcast.BootReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.PHONE_STATE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".Broadcast.NotificationReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.shadowarm.dynamicnotchbar.NOTIFICATION_RECEIVED" />
+            </intent-filter>
+        </receiver>
         <service
             android:name=".MyNotificationListenerService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"

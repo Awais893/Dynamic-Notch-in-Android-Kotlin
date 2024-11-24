@@ -1,15 +1,14 @@
 package com.shadowarm.dynamicnotchbar.OverLayService
 
 import android.animation.ValueAnimator
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
-import android.content.Intent
+import android.annotation.SuppressLint
+import android.app.*
+import android.content.*
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +20,7 @@ class OverlayService : Service() {
 
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: View
+    private lateinit var notificationReceiver: BroadcastReceiver
     private val CHANNEL_ID = "OverlayServiceChannel"
     private val initialWidth = 232 // Initial width in dp
     private val expandedWidth = 270 // Expanded width in dp
@@ -71,13 +71,22 @@ class OverlayService : Service() {
 
         windowManager.addView(overlayView, layoutParams)
 
-        // Trigger animation when notification arrives
+        // Register receiver to listen for notification events
         registerNotificationObserver()
     }
 
     private fun registerNotificationObserver() {
-        // Simulate notification arrival or replace this with actual listener logic
-        animateOverlayExpansion()
+        notificationReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                Log.d("NotificationReceiver", "Broadcast received with action: ${intent.action}")
+                animateOverlayExpansion()
+            }
+
+
+        }
+
+        val filter = IntentFilter("com.shadowarm.dynamicnotchbar.NOTIFICATION_RECEIVED")
+        registerReceiver(notificationReceiver, filter)
     }
 
     private fun animateOverlayExpansion() {
@@ -93,14 +102,26 @@ class OverlayService : Service() {
             // Update the width
             layoutParams.width = animatedValue
 
-            // Calculate the center offset
-            val displayMetrics = DisplayMetrics()
-            windowManager.defaultDisplay.getMetrics(displayMetrics)
-            val screenWidth = displayMetrics.widthPixels
-            layoutParams.x = (screenWidth - animatedValue) / 2 // Center the overlay
+            // Keep overlay centered horizontally
+            layoutParams.x = 0
 
             windowManager.updateViewLayout(overlayView, layoutParams)
         }
+
+        // Add scaling effect to the overlay view
+        overlayView.animate()
+            .scaleX(1.1f) // Slight horizontal scaling
+            .scaleY(1.1f) // Slight vertical scaling
+            .setDuration(250) // Duration for scaling effect
+            .withEndAction {
+                overlayView.animate()
+                    .scaleX(1f) // Reset to original scale
+                    .scaleY(1f)
+                    .setDuration(250)
+                    .start()
+            }
+            .start()
+
         animator.duration = 500 // Set duration for expansion and contraction
         animator.start()
     }
@@ -112,6 +133,7 @@ class OverlayService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(notificationReceiver)
         windowManager.removeView(overlayView)
     }
 

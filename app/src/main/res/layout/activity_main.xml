@@ -9,4 +9,11 @@
         android:layout_height="wrap_content"
         android:text="Start Notification Listener"
         android:layout_centerInParent="true"/>
+    <Button
+        android:id="@+id/send_broadcast_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/start_service_button"
+        android:text="Start Notification Listener"
+        android:layout_centerInParent="true"/>
 </RelativeLayout>
